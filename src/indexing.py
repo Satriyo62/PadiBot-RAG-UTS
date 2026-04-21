@@ -32,7 +32,7 @@ def build_index_langchain():
     loader2 = PyPDFLoader(f"{DATA_DIR}/indikator-pertanian-provinsi-jawa-timur-2024.pdf")
     docs2 = loader2.load()
 
-    csv_loader = CSVLoader(f"{DATA_DIR}/Data_Narasi_Pertanian_Jatim_Siap_RAG.csv")
+    csv_loader = CSVLoader(f"{DATA_DIR}/Produksi_Padi_Bulanan_Jatim_Clean.csv")
     csv_docs = csv_loader.load()
 
     documents = docs1 + docs2 + csv_docs
