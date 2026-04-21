@@ -1,179 +1,151 @@
-"""
-=============================================================
-PIPELINE QUERY — RAG UTS Data Engineering
-=============================================================
-"""
-
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# CONFIG
-TOP_K     = int(os.getenv("TOP_K", 3))
-VS_DIR    = Path(os.getenv("VECTORSTORE_DIR", "./vectorstore"))
-LLM_MODEL = os.getenv("LLM_MODEL_NAME", "llama3-8b-8192")
+TOP_K = int(os.getenv("TOP_K", 5))
+LLM_MODEL = os.getenv("LLM_MODEL_NAME", "llama-3.1-8b-instant")
+
+VS_DATA = Path("./vectorstore_data")
+VS_PDF = Path("./vectorstore_pdf")
 
 
-# =============================================================
+# =========================
 # LOAD VECTORSTORE
-# =============================================================
-def load_vectorstore():
+# =========================
+def load_vs(path):
     from langchain_community.vectorstores import Chroma
     from src.embeddings import get_embedding
 
-    if not VS_DIR.exists():
-        raise FileNotFoundError(
-            f"Vector store tidak ditemukan di '{VS_DIR}'.\n"
-            "Jalankan dulu: python src/indexing.py"
-        )
-
-    embedding_model = get_embedding()
-
-    vectorstore = Chroma(
-        persist_directory=str(VS_DIR),
-        embedding_function=embedding_model
+    return Chroma(
+        persist_directory=str(path),
+        embedding_function=get_embedding()
     )
 
-    return vectorstore
+
+# =========================
+# DETECT QUERY TYPE
+# =========================
+def detect_query_type(question):
+    q = question.lower()
+
+    if any(k in q for k in ["tren", "mengapa", "kenapa", "analisis"]):
+        return "analisis"
+
+    return "data"
 
 
-# =============================================================
-# RETRIEVE CONTEXT
-# =============================================================
-def retrieve_context(vectorstore, question: str, top_k: int = TOP_K) -> list:
-    results = vectorstore.similarity_search_with_score(question, k=top_k)
+# =========================
+# DETECT LEVEL
+# =========================
+def detect_level(question):
+    q = question.lower()
 
-    contexts = []
-    for doc, score in results:
-        contexts.append({
-            "content": doc.page_content,
-            "source": doc.metadata.get("source", "unknown"),
-            "score": round(float(score), 4)
-        })
+    if "provinsi" in q:
+        return "provinsi"
+    elif "kabupaten" in q:
+        return "kabupaten"
 
-    return contexts
+    return None
 
 
-# =============================================================
+# =========================
+# RETRIEVE
+# =========================
+def retrieve(question):
+
+    query_type = detect_query_type(question)
+    level = detect_level(question)
+
+    vs_data = load_vs(VS_DATA)
+    vs_pdf = load_vs(VS_PDF)
+
+    if query_type == "data":
+        print("➡️ Mode: DATA")
+
+        if level:
+            print(f"🎯 Filter level: {level}")
+            return vs_data.similarity_search(
+                question,
+                k=TOP_K,
+                filter={"level": level}
+            )
+
+        return vs_data.similarity_search(question, k=TOP_K)
+
+    elif query_type == "analisis":
+        print("➡️ Mode: ANALISIS")
+        return vs_pdf.similarity_search(question, k=TOP_K)
+
+
+# =========================
 # BUILD PROMPT
-# =============================================================
-def build_prompt(question: str, contexts: list) -> str:
-    context_text = "\n\n---\n\n".join(
-        [f"[Sumber: {c['source']}]\n{c['content']}" for c in contexts]
-    )
+# =========================
+def build_prompt(question, docs):
 
-    prompt = f"""Kamu adalah asisten AI yang membantu analisis data pertanian di Jawa Timur.
+    context = "\n\n---\n\n".join([d.page_content for d in docs])
+
+    return f"""
+Kamu adalah asisten AI ahli statistik pertanian Jawa Timur.
 
 INSTRUKSI:
-- Jawab HANYA berdasarkan konteks
+- Jawab hanya dari konteks
+- Jika pertanyaan menyebut PROVINSI → gunakan hanya data provinsi
+- DILARANG menggunakan data kabupaten untuk menjawab provinsi
+- Jika tren → bandingkan angka
 - Jangan mengarang
-- Jika tidak ada, katakan tidak ditemukan
-- Jawab singkat, jelas, Bahasa Indonesia
 
 KONTEKS:
-{context_text}
+{context}
 
 PERTANYAAN:
 {question}
 
-JAWABAN:"""
+JAWABAN:
+"""
 
-    return prompt
 
-
-# =============================================================
-# GROQ LLM
-# =============================================================
-def get_answer_groq(prompt: str) -> str:
+# =========================
+# GROQ
+# =========================
+def get_answer(prompt):
     from groq import Groq
 
-    api_key = os.getenv("GROQ_API_KEY")
+    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-    if not api_key:
-        raise ValueError("GROQ_API_KEY belum diatur di file .env")
-
-    client = Groq(api_key=api_key)
-
-    response = client.chat.completions.create(
+    res = client.chat.completions.create(
         model=LLM_MODEL,
         messages=[{"role": "user", "content": prompt}],
-        temperature=0.1,
-        max_tokens=1024
+        temperature=0.1
     )
 
-    return response.choices[0].message.content
+    return res.choices[0].message.content
 
 
-# =============================================================
-# MAIN PIPELINE
-# =============================================================
-def answer_question(question: str, vectorstore=None) -> dict:
-
-    if vectorstore is None:
-        vectorstore = load_vectorstore()
-
-    print(f"\n🔍 Mencari konteks untuk: {question}")
-
-    contexts = retrieve_context(vectorstore, question)
-    print(f"   ✅ {len(contexts)} dokumen ditemukan")
-
-    prompt = build_prompt(question, contexts)
-
-    print("🤖 Mengirim ke LLM (Groq)...")
-
-    answer = get_answer_groq(prompt)
-
-    return {
-        "question": question,
-        "answer": answer,
-        "contexts": contexts
-    }
+# =========================
+# MAIN
+# =========================
+def answer_question(q):
+    docs = retrieve(q)
+    print (docs)
+    prompt = build_prompt(q, docs)
+    return get_answer(prompt)
 
 
-# =============================================================
+# =========================
 # CLI
-# =============================================================
+# =========================
 if __name__ == "__main__":
 
-    print("=" * 55)
-    print("🤖 RAG System — UTS Data Engineering")
-    print("Ketik 'keluar' untuk exit")
-    print("=" * 55)
-
-    try:
-        vs = load_vectorstore()
-        print("✅ Vector database berhasil dimuat")
-    except FileNotFoundError as e:
-        print(f"❌ Error: {e}")
-        exit(1)
+    print("=" * 50)
+    print("RAG FINAL READY 🔥")
+    print("=" * 50)
 
     while True:
-        question = input("\n❓ Pertanyaan: ").strip()
+        q = input("\n❓ ").strip()
 
-        if question.lower() in ["keluar", "exit", "quit"]:
-            print("👋 Selesai")
+        if q.lower() in ["exit", "keluar"]:
             break
 
-        if not question:
-            print("⚠️ Pertanyaan kosong")
-            continue
-
-        try:
-            result = answer_question(question, vs)
-
-            print("\n" + "─" * 55)
-            print("💬 JAWABAN:")
-            print(result["answer"])
-
-            print("\n📚 SUMBER:")
-            for i, ctx in enumerate(result["contexts"], 1):
-                print(f"[{i}] Score: {ctx['score']} | {ctx['source']}")
-                print(f"     {ctx['content'][:120]}...")
-
-            print("─" * 55)
-
-        except Exception as e:
-            print(f"❌ Error: {e}")
-            print("Cek API key / koneksi internet")
+        print("\n💬", answer_question(q))
