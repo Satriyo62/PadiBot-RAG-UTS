@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # CONFIG
-TOP_K     = int(os.getenv("TOP_K", 3))
+TOP_K     = int(os.getenv("TOP_K", 25))
 VS_DIR    = Path(os.getenv("VECTORSTORE_DIR", "./vectorstore"))
 LLM_MODEL = os.getenv("LLM_MODEL_NAME", "llama3-8b-8192")
 
@@ -20,7 +20,7 @@ LLM_MODEL = os.getenv("LLM_MODEL_NAME", "llama3-8b-8192")
 # LOAD VECTORSTORE
 # =============================================================
 def load_vectorstore():
-    from langchain_community.vectorstores import Chroma
+    from langchain_chroma import Chroma
     from src.embeddings import get_embedding
 
     if not VS_DIR.exists():
@@ -133,13 +133,13 @@ def answer_question(question: str, vectorstore=None) -> dict:
 
 
 # =============================================================
-# CLI
+# CLI (SATU KALI JALAN / TANPA LOOP)
 # =============================================================
 if __name__ == "__main__":
+    import sys
 
     print("=" * 55)
     print("🤖 RAG System — UTS Data Engineering")
-    print("Ketik 'keluar' untuk exit")
     print("=" * 55)
 
     try:
@@ -149,31 +149,32 @@ if __name__ == "__main__":
         print(f"❌ Error: {e}")
         exit(1)
 
-    while True:
-        question = input("\n❓ Pertanyaan: ").strip()
+    # Mengambil pertanyaan dari argumen terminal (jika ada), atau input manual
+    if len(sys.argv) > 1:
+        question = " ".join(sys.argv[1:])
+        print(f"\n❓ Pertanyaan: {question}")
+    else:
+        question = input("\n❓ Masukkan pertanyaan: ").strip()
 
-        if question.lower() in ["keluar", "exit", "quit"]:
-            print("👋 Selesai")
-            break
+    # Cek jika input kosong
+    if not question:
+        print("⚠️ Pertanyaan kosong. Selesai.")
+        exit(0)
 
-        if not question:
-            print("⚠️ Pertanyaan kosong")
-            continue
+    try:
+        result = answer_question(question, vs)
 
-        try:
-            result = answer_question(question, vs)
+        print("\n" + "─" * 55)
+        print("💬 JAWABAN:")
+        print(result["answer"])
 
-            print("\n" + "─" * 55)
-            print("💬 JAWABAN:")
-            print(result["answer"])
+        print("\n📚 SUMBER:")
+        for i, ctx in enumerate(result["contexts"], 1):
+            print(f"[{i}] Score: {ctx['score']} | {ctx['source']}")
+            print(f"     {ctx['content'][:120]}...")
 
-            print("\n📚 SUMBER:")
-            for i, ctx in enumerate(result["contexts"], 1):
-                print(f"[{i}] Score: {ctx['score']} | {ctx['source']}")
-                print(f"     {ctx['content'][:120]}...")
+        print("─" * 55)
 
-            print("─" * 55)
-
-        except Exception as e:
-            print(f"❌ Error: {e}")
-            print("Cek API key / koneksi internet")
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        print("Cek API key / koneksi internet")
