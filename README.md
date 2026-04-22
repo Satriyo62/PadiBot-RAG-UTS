@@ -40,19 +40,20 @@ padibot-rag-uts/
 ├── data/                    # Dokumen sumber Anda (PDF, TXT, dll.)
 │   ├── Data_Narasi_Pertanian_Jatim_Siap_RAG.csv
 │   ├── indikator-pertanian-provinsi-jawa-timur-2021.pdf
-│   └── indikator-pertanian-provinsi-jawa-timur-2024.pdf         
+│   └── indikator-pertanian-provinsi-jawa-timur-2024.pdf
+├── docs/
+│   └── arsitektur.png       # 📌 Diagram arsitektur
+├── evaluation/
+│   └── hasil_evaluasi.xlsx  # 📌 Tabel evaluasi 10 pertanyaan         
 ├── src/
 │   ├── indexing.py          
 │   ├── query.py             
 │   └── embeddings.py        
-├── docs/
-│   └── arsitektur.png       # 📌 Diagram arsitektur
-├── evaluation/
-│   └── hasil_evaluasi.xlsx  # 📌 Tabel evaluasi 10 pertanyaan
 ├── .env.example             # Template environment variables
 ├── .gitignore
-├── requirements.txt
-└── README.md
+├── README.md
+└── requirements.txt
+
 ```
 
 ---
@@ -102,7 +103,10 @@ python -m src.indexing.py
 ### 5. Jalankan Sistem RAG
 
 ```bash
-# Via CLI
+# Dengan Streamlit UI
+python -m streamlit run ui.app.py
+
+# Atau via CLI
 python -m src.query.py
 ```
 
