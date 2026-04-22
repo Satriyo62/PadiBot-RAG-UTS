@@ -155,7 +155,7 @@ Semua konfigurasi utama ada di `.env.example` (atau langsung di setiap file):
 
 ## 📚 Referensi & Sumber
 
-- Framework: *(LangChain docs / LlamaIndex docs)*
+- Framework: *https://docs.langchain.com/oss/python/langchain/quickstart*
 - LLM: *Groq*
 - Vector DB: *ChromaDB*
 - Tutorial yang digunakan: *https://reference.langchain.com/python/langchain-mongodb/utils/maximal_marginal_relevance*
