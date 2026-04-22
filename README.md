@@ -119,7 +119,6 @@ Semua konfigurasi utama ada di `src/config.py` (atau langsung di setiap file):
 
 ## 📊 Hasil Evaluasi
 
-*(Isi setelah pengujian selesai)*
 
 | # | Pertanyaan | Jawaban Sistem | Jawaban Ideal | Skor (1-5) |
 |---|-----------|----------------|---------------|-----------|
@@ -136,7 +135,7 @@ Semua konfigurasi utama ada di `src/config.py` (atau langsung di setiap file):
 
 ## 🏗️ Arsitektur Sistem
 
-**
+![alt text](https://github.com/Satriyo62/PadiBot-RAG-UTS/blob/main/docs/arsitektur.png?raw=true)
 
 ```
 [Dokumen] → [Loader] → [Splitter] → [Embedding] → [Vector DB]
