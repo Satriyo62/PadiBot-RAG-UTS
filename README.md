@@ -83,7 +83,7 @@ cp .env.example .env
 Letakkan dokumen sumber Anda di folder `data/`:
 ```bash
 # Contoh: salin PDF atau TXT ke folder data
-cp dokumen-saya.pdf data/
+cp indikator-pertanian-provinsi-jawa-timur-2024.pdf data/
 ```
 
 ### 4. Jalankan Indexing (sekali saja)
@@ -148,8 +148,8 @@ Semua konfigurasi utama ada di `src/config.py` (atau langsung di setiap file):
 ## 📚 Referensi & Sumber
 
 - Framework: *(LangChain docs / LlamaIndex docs)*
-- LLM: *(Groq / Gemini / Ollama)*
-- Vector DB: *(ChromaDB / FAISS docs)*
+- LLM: *Groq*
+- Vector DB: *ChromaDB*
 - Tutorial yang digunakan: *(cantumkan URL)*
 
 ---
