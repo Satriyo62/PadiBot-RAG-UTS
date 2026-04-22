@@ -2,7 +2,7 @@
 
 # Core
 python-dotenv>=1.2.2
-streamlit>=1.32.0
+streamlit>=1.56.0
 
 # LangChain
 langchain>=1.2.15
