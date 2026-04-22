@@ -16,10 +16,10 @@ Mahasiswa mengisi, memodifikasi, dan mengembangkan kode ini sesuai topik kelompo
 | Muhsyam Fahriel Septiansyah  | 244311021 | Data Engineer         |
 | Satriyo Wicaksono Yunan Mubarok  | 244311027 | Project Manager         |
 
-**Topik Domain:** *(isi: Akademik / Kesehatan / Hukum / Bisnis / Pertanian / Teknologi)*  
-**Stack yang Dipilih:** *(isi: LangChain / LlamaIndex / From Scratch)*  
-**LLM yang Digunakan:** *(isi: Groq / Gemini / Ollama / lainnya)*  
-**Vector DB yang Digunakan:** *(isi: ChromaDB / FAISS / lainnya)*
+**Topik Domain:** *Pertanian*  
+**Stack yang Dipilih:** *LangChain*  
+**LLM yang Digunakan:** *Groq*  
+**Vector DB yang Digunakan:** *ChromaDB*
 
 ---
 
@@ -56,8 +56,8 @@ rag-uts-[nama-kelompok]/
 
 ```bash
 # Clone repository ini
-git clone https://github.com/[username]/rag-uts-[kelompok].git
-cd rag-uts-[kelompok]
+git clone https://github.com/Satriyo62/PadiBot-RAG-UTS.git
+cd rag-uts-padibot
 
 # Buat virtual environment
 python -m venv venv
@@ -113,7 +113,7 @@ Semua konfigurasi utama ada di `src/config.py` (atau langsung di setiap file):
 | `CHUNK_SIZE` | 500 | Ukuran setiap chunk teks (karakter) |
 | `CHUNK_OVERLAP` | 50 | Overlap antar chunk |
 | `TOP_K` | 3 | Jumlah dokumen relevan yang diambil |
-| `MODEL_NAME` | *(isi)* | Nama model LLM yang digunakan |
+| `MODEL_NAME` | *llama-3.1-8b-instant* | Nama model LLM yang digunakan |
 
 ---
 
@@ -125,6 +125,9 @@ Semua konfigurasi utama ada di `src/config.py` (atau langsung di setiap file):
 |---|-----------|----------------|---------------|-----------|
 | 1 | ... | ... | ... | ... |
 | 2 | ... | ... | ... | ... |
+| 3 | ... | ... | ... | ... |
+| 4 | ... | ... | ... | ... |
+| 5 | ... | ... | ... | ... |
 
 **Rata-rata Skor:** ...  
 **Analisis:** ...
@@ -133,7 +136,7 @@ Semua konfigurasi utama ada di `src/config.py` (atau langsung di setiap file):
 
 ## 🏗️ Arsitektur Sistem
 
-*(Masukkan gambar diagram arsitektur di sini)*
+**
 
 ```
 [Dokumen] → [Loader] → [Splitter] → [Embedding] → [Vector DB]
@@ -156,7 +159,7 @@ Semua konfigurasi utama ada di `src/config.py` (atau langsung di setiap file):
 
 - **Mata Kuliah:** Data Engineering
 - **Program Studi:** D4 Teknologi Rekayasa Perangkat Lunak
-- **Deadline:** *(isi tanggal)*
+- **Deadline:** *23 April 2026*
 =======
 
 >>>>>>> ad10b743c360c8333a1b2356e83805154222005e
