@@ -1,10 +1,20 @@
 <<<<<<< HEAD
-# 🤖 RAG Starter Pack — UTS Data Engineering
+# 🤖 Sistem Tanya Jawab Berbasis Retrieval-Augmented Generation (RAG) untuk Analisis Data Produksi Padi di Jawa Timur
 
 > **Retrieval-Augmented Generation** — Sistem Tanya-Jawab Cerdas Berbasis Dokumen
 
 Starter pack ini adalah **kerangka awal** proyek RAG untuk UTS Data Engineering D3/D4.
-Mahasiswa mengisi, memodifikasi, dan mengembangkan kode ini sesuai topik kelompok masing-masing.
+
+## 📖 Deskripsi Proyek
+
+**PadiBot** adalah sistem tanya-jawab cerdas berbasis dokumen yang mengimplementasikan arsitektur *Retrieval-Augmented Generation* (RAG). Proyek ini dikembangkan secara spesifik untuk memproses dan menjawab pertanyaan seputar domain **Pertanian**, berfokus pada dokumen referensi yang diberikan (seperti data Indikator Pertanian Provinsi).
+
+Alih-alih hanya mengandalkan pengetahuan umum bawaan dari AI, PadiBot bekerja dengan cara:
+1. Membaca dan mengekstrak informasi dari dokumen lokal kita.
+2. Menyimpan potongan informasi tersebut ke dalam *vector database* (ChromaDB).
+3. Mencari konteks yang paling relevan saat ada pertanyaan, lalu memprosesnya melalui LLM (Groq) untuk menghasilkan jawaban yang akurat dan sesuai fakta dari dokumen.
+
+Proyek ini dibangun menggunakan *framework* LangChain dengan antarmuka Streamlit, sebagai bentuk implementasi *pipeline* Data Engineering untuk pemenuhan tugas Ujian Tengah Semester (UTS).
 
 ---
 
@@ -16,36 +26,34 @@ Mahasiswa mengisi, memodifikasi, dan mengembangkan kode ini sesuai topik kelompo
 | Muhsyam Fahriel Septiansyah  | 244311021 | Data Engineer         |
 | Satriyo Wicaksono Yunan Mubarok  | 244311027 | Project Manager         |
 
-**Topik Domain:** *(isi: Akademik / Kesehatan / Hukum / Bisnis / Pertanian / Teknologi)*  
-**Stack yang Dipilih:** *(isi: LangChain / LlamaIndex / From Scratch)*  
-**LLM yang Digunakan:** *(isi: Groq / Gemini / Ollama / lainnya)*  
-**Vector DB yang Digunakan:** *(isi: ChromaDB / FAISS / lainnya)*
+**Topik Domain:** *Pertanian*  
+**Stack yang Dipilih:** *LangChain*  
+**LLM yang Digunakan:** *Groq*  
+**Vector DB yang Digunakan:** *ChromaDB*
 
 ---
 
 ## 🗂️ Struktur Proyek
 
 ```
-rag-uts-[nama-kelompok]/
+padibot-rag-uts/
 ├── data/                    # Dokumen sumber Anda (PDF, TXT, dll.)
-│   └── sample.txt           # Contoh dokumen (ganti dengan dokumen Anda)
-├── src/
-│   ├── indexing.py          # 🔧 WAJIB DIISI: Pipeline indexing
-│   ├── query.py             # 🔧 WAJIB DIISI: Pipeline query & retrieval
-│   ├── embeddings.py        # 🔧 WAJIB DIISI: Konfigurasi embedding
-│   └── utils.py             # Helper functions
-├── ui/
-│   └── app.py               # 🔧 WAJIB DIISI: Antarmuka Streamlit
+│   ├── Data_Narasi_Pertanian_Jatim_Siap_RAG.csv
+│   ├── indikator-pertanian-provinsi-jawa-timur-2021.pdf
+│   └── indikator-pertanian-provinsi-jawa-timur-2024.pdf
 ├── docs/
-│   └── arsitektur.png       # 📌 Diagram arsitektur (buat sendiri)
+│   └── arsitektur.png       # 📌 Diagram arsitektur
 ├── evaluation/
-│   └── hasil_evaluasi.xlsx  # 📌 Tabel evaluasi 10 pertanyaan
-├── notebooks/
-│   └── 01_demo_rag.ipynb    # Notebook demo dari hands-on session
+│   └── hasil_evaluasi.xlsx  # 📌 Tabel evaluasi 10 pertanyaan         
+├── src/
+│   ├── indexing.py          
+│   ├── query.py             
+│   └── embeddings.py        
 ├── .env.example             # Template environment variables
 ├── .gitignore
-├── requirements.txt
-└── README.md
+├── README.md
+└── requirements.txt
+
 ```
 
 ---
@@ -56,8 +64,8 @@ rag-uts-[nama-kelompok]/
 
 ```bash
 # Clone repository ini
-git clone https://github.com/[username]/rag-uts-[kelompok].git
-cd rag-uts-[kelompok]
+git clone https://github.com/Satriyo62/PadiBot-RAG-UTS.git
+cd padibot-rag-uts
 
 # Buat virtual environment
 python -m venv venv
@@ -74,7 +82,7 @@ pip install -r requirements.txt
 # Salin template env
 cp .env.example .env
 
-# Edit .env dan isi API key Anda
+# Edit .env.example dan isi API key Anda
 # JANGAN commit file .env ke GitHub!
 ```
 
@@ -83,48 +91,50 @@ cp .env.example .env
 Letakkan dokumen sumber Anda di folder `data/`:
 ```bash
 # Contoh: salin PDF atau TXT ke folder data
-cp dokumen-saya.pdf data/
+cp indikator-pertanian-provinsi-jawa-timur-2024.pdf data/
 ```
 
 ### 4. Jalankan Indexing (sekali saja)
 
 ```bash
-python src/indexing.py
+python -m src.indexing.py
 ```
 
 ### 5. Jalankan Sistem RAG
 
 ```bash
 # Dengan Streamlit UI
-streamlit run ui/app.py
+python -m streamlit run ui.app.py
 
 # Atau via CLI
-python src/query.py
+python -m src.query.py
 ```
 
 ---
 
 ## 🔧 Konfigurasi
 
-Semua konfigurasi utama ada di `src/config.py` (atau langsung di setiap file):
+Semua konfigurasi utama ada di `.env.example` (atau langsung di setiap file):
 
 | Parameter | Default | Keterangan |
 |-----------|---------|------------|
 | `CHUNK_SIZE` | 500 | Ukuran setiap chunk teks (karakter) |
 | `CHUNK_OVERLAP` | 50 | Overlap antar chunk |
 | `TOP_K` | 3 | Jumlah dokumen relevan yang diambil |
-| `MODEL_NAME` | *(isi)* | Nama model LLM yang digunakan |
+| `MODEL_NAME` | *llama3* | Nama model LLM yang digunakan |
 
 ---
 
 ## 📊 Hasil Evaluasi
 
-*(Isi setelah pengujian selesai)*
 
 | # | Pertanyaan | Jawaban Sistem | Jawaban Ideal | Skor (1-5) |
 |---|-----------|----------------|---------------|-----------|
 | 1 | ... | ... | ... | ... |
 | 2 | ... | ... | ... | ... |
+| 3 | ... | ... | ... | ... |
+| 4 | ... | ... | ... | ... |
+| 5 | ... | ... | ... | ... |
 
 **Rata-rata Skor:** ...  
 **Analisis:** ...
@@ -133,7 +143,7 @@ Semua konfigurasi utama ada di `src/config.py` (atau langsung di setiap file):
 
 ## 🏗️ Arsitektur Sistem
 
-*(Masukkan gambar diagram arsitektur di sini)*
+![alt text](https://github.com/Satriyo62/PadiBot-RAG-UTS/blob/main/docs/arsitektur.png?raw=true)
 
 ```
 [Dokumen] → [Loader] → [Splitter] → [Embedding] → [Vector DB]
@@ -145,10 +155,10 @@ Semua konfigurasi utama ada di `src/config.py` (atau langsung di setiap file):
 
 ## 📚 Referensi & Sumber
 
-- Framework: *(LangChain docs / LlamaIndex docs)*
-- LLM: *(Groq / Gemini / Ollama)*
-- Vector DB: *(ChromaDB / FAISS docs)*
-- Tutorial yang digunakan: *(cantumkan URL)*
+- Framework: *https://docs.langchain.com/oss/python/langchain/quickstart*
+- LLM: *Groq*
+- Vector DB: *ChromaDB*
+- Tutorial yang digunakan: *https://reference.langchain.com/python/langchain-mongodb/utils/maximal_marginal_relevance*
 
 ---
 
@@ -156,7 +166,7 @@ Semua konfigurasi utama ada di `src/config.py` (atau langsung di setiap file):
 
 - **Mata Kuliah:** Data Engineering
 - **Program Studi:** D4 Teknologi Rekayasa Perangkat Lunak
-- **Deadline:** *(isi tanggal)*
+- **Deadline:** *23 April 2026*
 =======
 
 >>>>>>> ad10b743c360c8333a1b2356e83805154222005e
